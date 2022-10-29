@@ -1,31 +1,68 @@
 <script setup lang="ts">
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
-import HelloWorld from './components/HelloWorld.vue'
+import { watchEffect } from 'vue'
+import { File, Repl, ReplStore } from '@vue/repl'
+import '@vue/repl/style.css'
+import mainCode from './template/main.vue?raw'
+import welcomeCode from './template/welcome.vue?raw'
+import naiveUiCode from './template/naive-ui.js?raw'
+import { useStore } from './composables/store'
+
+
+// retrieve some configuration options from the URL
+const query = new URLSearchParams(location.search)
+
+const store = useStore({
+  serializedState: location.hash.slice(1)
+})
+store.init()
+console.log(store.state.activeFile.code);
+
+// console.log(query);
+
+// const APP_FILE = 'App.vue'
+// const MAIN_FILE = 'PlaygroundMain.vue'
+// const NAIVE_UI = 'naive-ui.js'
+
+// const store = new ReplStore({
+//   // initialize repl with previously serialized state
+//   serializedState: location.hash.slice(1),
+
+//   // starts on the output pane (mobile only) if the URL has a showOutput query
+//   showOutput: query.has('showOutput'),
+//   // starts on a different tab on the output pane if the URL has a outputMode query
+//   // and default to the "preview" tab
+//   outputMode: (query.get('outputMode') || 'preview'),
+// })
+
+// store.init()
+// // persist state to URL hash
+// store.setImportMap({
+//   imports: {
+//     'naive-ui':'https://unpkg.com/naive-ui@2.30.3/dist/index.prod.js'
+//   }
+// })
+// store.setImportMap({
+//   imports: {
+//     'naive-ui': 'https://unpkg.com/naive-ui@latest/dist/index.prod.js'
+//   }
+// })
+// store.state.files[APP_FILE] = new File(APP_FILE, welcomeCode)
+// store.state.files[MAIN_FILE] = new File(MAIN_FILE, mainCode, true)
+// store.state.files[NAIVE_UI] = new File(NAIVE_UI, naiveUiCode, true)
+// watchEffect(() => history.replaceState({}, '', store.serialize()))
 </script>
 
 <template>
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+  <div h-100vh>
+    <Repl 
+      :store="store"
+      :clear-console="false" 
+    h-full/>
   </div>
-  <HelloWorld msg="Vite + Vue" />
 </template>
-
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+<style>
+*{
+  margin: 0;
+  padding: 0
 }
 </style>

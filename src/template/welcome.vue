@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, version as vueVersion } from 'vue'
+import { NInput } from 'naive-ui'
 const msg = ref('Hello World!')
 </script>
 

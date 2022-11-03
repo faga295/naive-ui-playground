@@ -38,7 +38,7 @@ export const useStore = (initial: Initial) => {
   // const hideFile = computed(() => !IS_DEV && !userOptions.showHidden)
   const importMap = {
     imports: {
-      'naive-ui': 'https://cdn.jsdelivr.net/npm/naive-ui@2.33.5/dist/index.min.mjs',
+      'naive-ui': 'https://cdn.jsdelivr.net/npm/naive-ui-esm@0.0.2/dist/index.mjs',
       'vue': 'https://unpkg.com/@vue/runtime-dom@3.2.41/dist/runtime-dom.esm-browser.js'
     }
   }
@@ -136,7 +136,9 @@ export const useStore = (initial: Initial) => {
 
   async function init() {
     // await setVueVersion(versions.vue)
+    // @ts-ignore
     compiler.value = await import('https://unpkg.com/@vue/compiler-sfc@3.2.41/dist/compiler-sfc.esm-browser.js')
+    // @ts-ignore
     store.compiler = compiler.value
     for (const file of Object.values(state.files)) {
       compileFile(store, file)

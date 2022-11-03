@@ -15,7 +15,6 @@ const store = useStore({
   serializedState: location.hash.slice(1)
 })
 store.init()
-console.log(store.state.activeFile.code);
 
 // console.log(query);
 

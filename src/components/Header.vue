@@ -1,11 +1,24 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import { useDark, useToggle } from '@vueuse/core'
 import { DarkTheme20Regular } from '@vicons/fluent'
 import { LogoGithub } from '@vicons/ionicons5'
+import type { ReplStore } from '../composables/store'
+import { getVersion } from '../utils/dependency'
+
+const { store } = defineProps<{
+  store: ReplStore
+}>()
+console.log(store)
+
 const isDark = useDark()
 const toggleDark = useToggle(isDark)
-const naiveVersion = ref()
+const versions = getVersion()
+const options = computed(() =>
+  versions.value.map((item: string) => ({
+    label: item,
+    value: item
+  }))
+)
 </script>
 
 <template>
@@ -20,7 +33,12 @@ const naiveVersion = ref()
 
       <div flex items-center gap-2>
         <div>
-          <n-select w-40 />
+          <n-select
+            w-40
+            :model-value="store.versions.vue"
+            :options="options"
+            @update:model-value="(version) => store.setVersion('vue', version)"
+          />
         </div>
         <div cursor-pointer>
           <n-icon size="25" @click="toggleDark()">
@@ -39,13 +57,20 @@ const naiveVersion = ref()
   </div>
 </template>
 
-<style>
+<style lang="scss">
 .nav {
   box-shadow: 0 0 6px #18a058;
   z-index: 1;
+  background-color: var(--bg);
+  color: var(--text-color);
+  a {
+    color: var(--text-color);
+  }
 }
 .dark {
-  background-color: #000;
-  color: #fff;
+  .nav {
+    --bg: #1a1a1a;
+    --text-color: #fff;
+  }
 }
 </style>

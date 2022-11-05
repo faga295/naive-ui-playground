@@ -6,22 +6,28 @@ import Header from './components/Header.vue'
 
 // retrieve some configuration options from the URL
 // const query = new URLSearchParams(location.search)
-
+const show = ref(true)
 const store = useStore({
   serializedState: location.hash.slice(1)
 })
-store.init()
+onMounted(async () => {
+  await store.init()
+  show.value = false
+})
 </script>
 
 <template>
-  <div h-100vh flex flex-col>
-    <Header h-14 />
-    <Repl
-      :store="store"
-      :clear-console="false"
-      flex-1
-      :style="{ '--color-branding': '#18a058' }"
-    />
+  <div h-100vh>
+    <n-spin :show="show" h-full>
+      <Header v-if="!show" :store="store" h-14 />
+      <Repl
+        v-if="!show"
+        :store="store"
+        :clear-console="false"
+        flex-1
+        :style="{ '--color-branding': '#18a058' }"
+      />
+    </n-spin>
   </div>
 </template>
 
@@ -33,5 +39,10 @@ store.init()
 a {
   text-decoration: none;
   color: #000;
+}
+.n-spin-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 </style>

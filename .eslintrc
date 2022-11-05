@@ -1,6 +1,10 @@
 {
   "extends": ["@antfu"],
   "rules": {
-    "@typescript-eslint/comma-dangle": "off"
+    "@typescript-eslint/comma-dangle": "off",
+    "arrow-parens": "off",
+    "curly": "off",
+    "antfu/if-newline": "off",
+    "@typescript-eslint/brace-style": "off"
   }
 }

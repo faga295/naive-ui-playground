@@ -11,7 +11,7 @@ export interface Initial {
   userOptions?: UserOptions
   pr?: string | null
 }
-export type VersionKey = 'vue' | 'elementPlus'
+export type VersionKey = 'vue' | 'naiveUI'
 export type Versions = Record<VersionKey, string>
 export interface UserOptions {
   styleSource?: string
@@ -29,12 +29,12 @@ export const USER_IMPORT_MAP = 'import_map.json'
 
 export const useStore = (initial: Initial) => {
   const versions = reactive(
-    initial.versions || { vue: 'latest', elementPlus: 'latest' }
+    initial.versions || { vue: 'latest', naiveUI: 'latest' }
   )
 
-  let compiler = shallowRef<typeof import('vue/compiler-sfc')>()
+  const compiler = shallowRef<typeof import('vue/compiler-sfc')>()
   // const [nightly, toggleNightly] = $(useToggle(false))
-  let userOptions = ref<UserOptions>(initial.userOptions || {})
+  // let userOptions = ref<UserOptions>(initial.userOptions || {})
   // const hideFile = computed(() => !IS_DEV && !userOptions.showHidden)
   const importMap = {
     imports: {
@@ -71,7 +71,6 @@ export const useStore = (initial: Initial) => {
   //   mergeImportMap(bultinImportMap, userImportMap)
   // )
 
-
   // eslint-disable-next-line no-console
   // console.log('Files:', files, 'Options:', userOptions)
 
@@ -93,24 +92,23 @@ export const useStore = (initial: Initial) => {
       state.files[IMPORT_MAP] = new File(
         IMPORT_MAP,
         JSON.stringify(content, undefined, 2),
-        
       )
     },
     { immediate: true, deep: true }
   )
-//   watch(
-//     () => versions.elementPlus,
-//     (version) => {
-//       const file = new File(
-//         ELEMENT_PLUS_FILE,
-//         generateElementPlusCode(version, userOptions.styleSource).trim(),
-//         hideFile
-//       )
-//       state.files[ELEMENT_PLUS_FILE] = file
-//       compileFile(store, file)
-//     },
-//     { immediate: true }
-//   )
+  // watch(
+  //   () => versions.elementPlus,
+  //   (version) => {
+  //     const file = new File(
+  //       ELEMENT_PLUS_FILE,
+  //       generateElementPlusCode(version, userOptions.styleSource).trim(),
+  //       hideFile
+  //     )
+  //     state.files[ELEMENT_PLUS_FILE] = file
+  //     compileFile(store, file)
+  //   },
+  //   { immediate: true }
+  // )
 
   // function generateElementPlusCode(version: string, styleSource?: string) {
   //   const style = styleSource
@@ -135,17 +133,16 @@ export const useStore = (initial: Initial) => {
   // }
 
   async function init() {
-    // await setVueVersion(versions.vue)
-    // @ts-ignore
-    compiler.value = await import('https://unpkg.com/@vue/compiler-sfc@3.2.41/dist/compiler-sfc.esm-browser.js')
-    // @ts-ignore
-    store.compiler = compiler.value
+    await setVueVersion(versions.vue)
     for (const file of Object.values(state.files)) {
       compileFile(store, file)
     }
-    console.log(files);
-    
-    watchEffect(() => compileFile(store, state.activeFile))
+
+    watchEffect(() => {
+      console.log('compile');
+      
+      compileFile(store, state.activeFile)
+    })
   }
 
   function getFiles() {
@@ -169,17 +166,19 @@ export const useStore = (initial: Initial) => {
 
   function initFiles(serializedState: string) {
     const files: StoreState['files'] = {}
-    
+
     if (serializedState) {
       const saved = deserialize(serializedState)
       for (const [filename, file] of Object.entries(saved)) {
-        if (filename === '_o') continue
+        if (filename === '_o')
+          continue
         files[filename] = new File(filename, file as string)
       }
       // userOptions = saved._o || {}
     } else {
       files[APP_FILE] = new File(APP_FILE, welcomeCode)
     }
+    files[NAIVEUI_FILE] = new File(NAIVEUI_FILE, naiveUiCode, true)
     files[MAIN_FILE] = new File(MAIN_FILE, mainCode, true)
     files[IMPORT_MAP] = new File(IMPORT_MAP, JSON.stringify(importMap))
     if (!files[USER_IMPORT_MAP]) {
@@ -188,7 +187,6 @@ export const useStore = (initial: Initial) => {
         JSON.stringify({ imports: {} }, undefined, 2)
       )
     }
-    files[NAIVEUI_FILE] = new File(NAIVEUI_FILE, naiveUiCode, true)
     return files
   }
 
@@ -210,24 +208,30 @@ export const useStore = (initial: Initial) => {
     delete state.files[filename]
   }
 
-
   function getImportMap() {
     return importMap
   }
 
-  // async function setVersion(key: VersionKey, version: string) {
-  //   switch (key) {
-  //     case 'elementPlus':
-  //       setElementPlusVersion(version)
-  //       break
-  //     case 'vue':
-  //       await setVueVersion(version)
-  //       break
-  //   }
-  // }
+  async function setVersion(key: VersionKey, version: string) {
+    console.log(version);
+    
+    // switch (key) {
+    //   case 'naiveUI':
+    //     setNaiveVersion(version)
+    //     break
+    //   case 'vue':
+    //     await setVueVersion(version)
+    //     break
+    // }
+    await setVueVersion(version)
+  }
 
-  function setElementPlusVersion(version: string) {
-    versions.elementPlus = version
+  async function setVueVersion(version: string) {
+    console.log('setversion');
+    
+    compiler.value = await import(`https://unpkg.com/@vue/compiler-sfc@${version}/dist/compiler-sfc.esm-browser.js`)
+    // @ts-expect-error compiler is unknown
+    store.compiler = compiler.value
   }
 
   return {
@@ -237,7 +241,7 @@ export const useStore = (initial: Initial) => {
 
     init,
     serialize,
-    // setVersion,
+    setVersion,
     // toggleNightly,
     pr: initial.pr,
   }

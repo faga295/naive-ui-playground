@@ -31,12 +31,13 @@ const options = computed(() =>
       </div>
 
       <div flex items-center gap-2>
-        <div>
+        <div flex items-center>
+          <span mr-2>Vue Version:</span>
           <n-select
             w-40
-            :model-value="store.versions.vue"
+            :value="store.versions.vue"
             :options="options"
-            @update:value="(version) => store.setVersion('vue', version)"
+            @update:value="(version: string) => store.setVersion('vue', version)"
           />
         </div>
         <div cursor-pointer>

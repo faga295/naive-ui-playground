@@ -96,41 +96,6 @@ export const useStore = (initial: Initial) => {
     },
     { immediate: true, deep: true }
   )
-  // watch(
-  //   () => versions.elementPlus,
-  //   (version) => {
-  //     const file = new File(
-  //       ELEMENT_PLUS_FILE,
-  //       generateElementPlusCode(version, userOptions.styleSource).trim(),
-  //       hideFile
-  //     )
-  //     state.files[ELEMENT_PLUS_FILE] = file
-  //     compileFile(store, file)
-  //   },
-  //   { immediate: true }
-  // )
-
-  // function generateElementPlusCode(version: string, styleSource?: string) {
-  //   const style = styleSource
-  //     ? styleSource.replace('#VERSION#', version)
-  //     : genCdnLink(
-  //         nightly ? '@element-plus/nightly' : 'element-plus',
-  //         version,
-  //         '/dist/index.css'
-  //       )
-  //   return elementPlusCode.replace('#STYLE#', style)
-  // }
-
-  // async function setVueVersion(version: string) {
-  //   const { compilerSfc, runtimeDom } = genVueLink(version)
-
-  //   compiler = await import(/* @vite-ignore */ compilerSfc)
-  //   state.vueRuntimeURL = runtimeDom
-  //   versions.vue = version
-
-  //   // eslint-disable-next-line no-console
-  //   console.info(`[@vue/repl] Now using Vue version: ${version}`)
-  // }
 
   async function init() {
     await setVueVersion(versions.vue)
@@ -152,8 +117,7 @@ export const useStore = (initial: Initial) => {
 
   function serialize() {
     const state: SerializeState = { ...getFiles() }
-    // state._o = userOptions
-    return '#'+utoa(JSON.stringify(state))
+    return utoa(JSON.stringify(state))
   }
   function deserialize(text: string): SerializeState {
     const state = JSON.parse(atou(text))
@@ -170,7 +134,6 @@ export const useStore = (initial: Initial) => {
           continue
         files[filename] = new File(filename, file as string)
       }
-      // userOptions = saved._o || {}
     } else {
       files[APP_FILE] = new File(APP_FILE, welcomeCode)
     }
@@ -209,14 +172,6 @@ export const useStore = (initial: Initial) => {
   }
 
   async function setVersion(key: VersionKey, version: string) {
-    // switch (key) {
-    //   case 'naiveUI':
-    //     setNaiveVersion(version)
-    //     break
-    //   case 'vue':
-    //     await setVueVersion(version)
-    //     break
-    // }
     await setVueVersion(version)
   }
 
@@ -224,6 +179,7 @@ export const useStore = (initial: Initial) => {
     compiler.value = await import(`https://unpkg.com/@vue/compiler-sfc@${version}/dist/compiler-sfc.esm-browser.js`)
     // @ts-expect-error compiler is unknown
     store.compiler = compiler.value
+    versions.vue = version
     importMap.imports.vue = `https://unpkg.com/@vue/runtime-dom@${version}/dist/runtime-dom.esm-browser.js`
   }
 
@@ -235,8 +191,6 @@ export const useStore = (initial: Initial) => {
     init,
     serialize,
     setVersion,
-    // toggleNightly,
-    pr: initial.pr,
   }
 }
 

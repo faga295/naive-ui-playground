@@ -1,7 +1,10 @@
 # naive-ui playground
 
 inspired by [element-plus playground](https://github.com/element-plus/element-plus-playground)
+
 ## To Do List
-- [ ] vue version select
+
+- [x] vue version select
+- [x] dark mode
 - [ ] naive-ui version select
-- [ ] naive-ui theme color
+- [x] naive-ui theme color

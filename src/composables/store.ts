@@ -36,12 +36,12 @@ export const useStore = (initial: Initial) => {
   // const [nightly, toggleNightly] = $(useToggle(false))
   // let userOptions = ref<UserOptions>(initial.userOptions || {})
   // const hideFile = computed(() => !IS_DEV && !userOptions.showHidden)
-  const importMap = {
+  const importMap = reactive({
     imports: {
       'naive-ui': 'https://cdn.jsdelivr.net/npm/naive-ui-esm@0.0.2/dist/index.mjs',
       'vue': 'https://unpkg.com/@vue/runtime-dom@3.2.41/dist/runtime-dom.esm-browser.js'
     }
-  }
+  })
   const files = initFiles(initial.serializedState || '')
   const state = reactive<StoreState>({
     mainFile: MAIN_FILE,
@@ -138,11 +138,7 @@ export const useStore = (initial: Initial) => {
       compileFile(store, file)
     }
 
-    watchEffect(() => {
-      console.log('compile');
-      
-      compileFile(store, state.activeFile)
-    })
+    watchEffect(() => compileFile(store, state.activeFile))
   }
 
   function getFiles() {
@@ -213,8 +209,6 @@ export const useStore = (initial: Initial) => {
   }
 
   async function setVersion(key: VersionKey, version: string) {
-    console.log(version);
-    
     // switch (key) {
     //   case 'naiveUI':
     //     setNaiveVersion(version)
@@ -227,11 +221,10 @@ export const useStore = (initial: Initial) => {
   }
 
   async function setVueVersion(version: string) {
-    console.log('setversion');
-    
     compiler.value = await import(`https://unpkg.com/@vue/compiler-sfc@${version}/dist/compiler-sfc.esm-browser.js`)
     // @ts-expect-error compiler is unknown
     store.compiler = compiler.value
+    importMap.imports.vue = `https://unpkg.com/@vue/runtime-dom@${version}/dist/runtime-dom.esm-browser.js`
   }
 
   return {

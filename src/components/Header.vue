@@ -8,7 +8,6 @@ import { getVersion } from '../utils/dependency'
 const { store } = defineProps<{
   store: ReplStore
 }>()
-console.log(store)
 
 const isDark = useDark()
 const toggleDark = useToggle(isDark)
@@ -37,7 +36,7 @@ const options = computed(() =>
             w-40
             :model-value="store.versions.vue"
             :options="options"
-            @update:model-value="(version) => store.setVersion('vue', version)"
+            @update:value="(version) => store.setVersion('vue', version)"
           />
         </div>
         <div cursor-pointer>

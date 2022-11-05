@@ -4,6 +4,7 @@ import { atou, utoa } from '../utils/encode'
 import mainCode from '../template/main.vue?raw'
 import welcomeCode from '../template/welcome.vue?raw'
 import naiveUiCode from '../template/naive-ui.js?raw'
+import { setupNaiveUi } from '@/template/naive-ui'
 
 export interface Initial {
   serializedState?: string
@@ -172,7 +173,14 @@ export const useStore = (initial: Initial) => {
   }
 
   async function setVersion(key: VersionKey, version: string) {
-    await setVueVersion(version)
+    switch (key) {
+      case 'vue':
+        await setVueVersion(version)
+        break
+      case 'naiveUI':
+        await setNaiveVersion(version)
+        break
+    }
   }
 
   async function setVueVersion(version: string) {
@@ -181,6 +189,10 @@ export const useStore = (initial: Initial) => {
     store.compiler = compiler.value
     versions.vue = version
     importMap.imports.vue = `https://unpkg.com/@vue/runtime-dom@${version}/dist/runtime-dom.esm-browser.js`
+  }
+  async function setNaiveVersion(version: string) {
+    versions.naiveUI = version
+    importMap.imports['naive-ui'] = `https://cdn.jsdelivr.net/npm/naive-ui-esm@${version}/dist/index.mjs`
   }
 
   return {

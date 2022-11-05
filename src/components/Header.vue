@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { useDark, useToggle } from '@vueuse/core'
+import type { ComputedRef } from 'vue'
 import { DarkTheme20Regular } from '@vicons/fluent'
 import { LogoGithub } from '@vicons/ionicons5'
-import type { ReplStore } from '../composables/store'
-import { getVersion } from '../utils/dependency'
+import type { ReplStore, VersionKey } from '../composables/store'
+import { getNaiveVersions, getVueVersions } from '../utils/dependency'
 
 const { store } = defineProps<{
   store: ReplStore
@@ -11,13 +12,36 @@ const { store } = defineProps<{
 
 const isDark = useDark()
 const toggleDark = useToggle(isDark)
-const versions = getVersion()
-const options = computed(() =>
-  versions.value.map((item: string) => ({
-    label: item,
-    value: item
-  }))
-)
+const vueVersions = getVueVersions()
+const naiveUIVersions = getNaiveVersions()
+const getOptions = (key: VersionKey) => {
+  let versions: ComputedRef<string[]>
+  switch (key) {
+    case 'vue':
+      versions = vueVersions
+      break
+    case 'naiveUI':
+      versions = naiveUIVersions
+      break
+  }
+
+  return computed(() =>
+    versions.value.map((item: string) => ({
+      label: item,
+      value: item
+    }))
+  )
+}
+const versions = reactive({
+  vue: {
+    active: store.versions.vue,
+    options: getOptions('vue')
+  },
+  naiveUI: {
+    active: store.versions.naiveUI,
+    options: getOptions('naiveUI')
+  }
+})
 </script>
 
 <template>
@@ -31,13 +55,13 @@ const options = computed(() =>
       </div>
 
       <div flex items-center gap-2>
-        <div flex items-center>
-          <span mr-2>Vue Version:</span>
+        <div v-for="(v, key) of versions" :key="key" flex items-center>
+          <span mr-2>{{ key }} Version:</span>
           <n-select
             w-40
-            :value="store.versions.vue"
-            :options="options"
-            @update:value="(version: string) => store.setVersion('vue', version)"
+            :value="v.active"
+            :options="v.options"
+            @update:value="(version: string) => store.setVersion(key, version)"
           />
         </div>
         <div cursor-pointer>

@@ -49,9 +49,7 @@ const versions = reactive({
     <div flex justify-between h-full>
       <div flex items-center h-full>
         <img src="/src/assets/logo.svg" alt="logo" h-8 mx-4 />
-        <div text-xl>
-          Naive UI Playground
-        </div>
+        <div text-xl>Naive UI Playground</div>
       </div>
 
       <div flex items-center gap-2>
@@ -70,7 +68,7 @@ const versions = reactive({
           </n-icon>
         </div>
         <div>
-          <a href="https://github.com/faga295/naive-ui-playground">
+          <a href="https://github.com/tusen-ai/naive-ui">
             <n-icon size="25" m-0>
               <LogoGithub />
             </n-icon>

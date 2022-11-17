@@ -4,7 +4,6 @@ import { atou, utoa } from '../utils/encode'
 import mainCode from '../template/main.vue?raw'
 import welcomeCode from '../template/welcome.vue?raw'
 import naiveUiCode from '../template/naive-ui.js?raw'
-import { setupNaiveUi } from '@/template/naive-ui'
 
 export interface Initial {
   serializedState?: string
@@ -54,27 +53,6 @@ export const useStore = (initial: Initial) => {
     resetFlip: true
   })
 
-  // const bultinImportMap = computed<ImportMap>(() =>
-  //   genImportMap(versions, nightly)
-  // )
-  // const userImportMap = $computed<ImportMap>(() => {
-  //   const code = state.files[USER_IMPORT_MAP]?.code.trim()
-  //   if (!code) return {}
-  //   let map: ImportMap = {}
-  //   try {
-  //     map = JSON.parse(code)
-  //   } catch (err) {
-  //     console.error(err)
-  //   }
-  //   return map
-  // })
-  // const importMap = $computed<ImportMap>(() =>
-  //   mergeImportMap(bultinImportMap, userImportMap)
-  // )
-
-  // eslint-disable-next-line no-console
-  // console.log('Files:', files, 'Options:', userOptions)
-
   const store: Store = reactive({
     init,
     state,
@@ -118,7 +96,7 @@ export const useStore = (initial: Initial) => {
 
   function serialize() {
     const state: SerializeState = { ...getFiles() }
-    return utoa(JSON.stringify(state))
+    return `#${utoa(JSON.stringify(state))}`
   }
   function deserialize(text: string): SerializeState {
     const state = JSON.parse(atou(text))
@@ -157,8 +135,8 @@ export const useStore = (initial: Initial) => {
   }
 
   function addFile(fileOrFilename: string | File) {
-    const file =
-      typeof fileOrFilename === 'string'
+    const file
+      = typeof fileOrFilename === 'string'
         ? new File(fileOrFilename)
         : fileOrFilename
     state.files[file.filename] = file

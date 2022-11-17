@@ -10,6 +10,7 @@ const show = ref(true)
 const store = useStore({
   serializedState: location.hash.slice(1)
 })
+watchEffect(() => history.replaceState({}, '', store.serialize()))
 onMounted(async () => {
   await store.init()
   show.value = false
@@ -20,13 +21,7 @@ onMounted(async () => {
   <div h-100vh>
     <n-spin :show="show" h-full>
       <Header v-if="!show" :store="store" h-14 />
-      <Repl
-        v-if="!show"
-        :store="store"
-        :clear-console="false"
-        flex-1
-        :style="{ '--color-branding': '#18a058' }"
-      />
+      <Repl v-if="!show" :store="store" :clear-console="false" flex-1 :style="{ '--color-branding': '#18a058' }" />
     </n-spin>
   </div>
 </template>
@@ -36,10 +31,12 @@ onMounted(async () => {
   margin: 0;
   padding: 0;
 }
+
 a {
   text-decoration: none;
   color: #000;
 }
+
 .n-spin-content {
   height: 100%;
   display: flex;

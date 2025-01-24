@@ -7,8 +7,9 @@ let installed = false
 export function setupNaiveUi() {
   if (installed) return
   const instance = getCurrentInstance()
-  // console.log(window);
-  instance.appContext.app.use(naive)
+  Object.keys(naive).forEach((name) => {
+    instance.appContext.app.component(name, naive[name])
+  })
   installed = true
 }
 

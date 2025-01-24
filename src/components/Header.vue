@@ -59,7 +59,7 @@ const versions = reactive({
             w-40
             :value="v.active"
             :options="v.options"
-            @update:value="(version: string) => store.setVersion(key, version)"
+            @update:value="(version: string) => { store.setVersion(key, version);v.active = version }"
           />
         </div>
         <div cursor-pointer>

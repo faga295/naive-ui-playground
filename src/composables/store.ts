@@ -28,7 +28,13 @@ const MAIN_FILE = 'PlaygroundMain.vue'
 const APP_FILE = 'App.vue'
 const NAIVEUI_FILE = 'naive-ui.js'
 const IMPORT_MAP = 'import-map.json'
-export const USER_IMPORT_MAP = 'import_map.json'
+const BUILT_IN_IMPORT_MAP = {
+  imports: {
+    'naive-ui':
+      'https://cdn.jsdelivr.net/npm/naive-ui-esm@2.41.0/dist/index.mjs',
+    vue: 'https://unpkg.com/@vue/runtime-dom@3.2.41/dist/runtime-dom.esm-browser.js'
+  }
+}
 
 export const useStore = (initial: Initial) => {
   const versions = reactive(
@@ -61,39 +67,13 @@ export const useStore = (initial: Initial) => {
     getImportMap,
     setImportMap,
     initialShowOutput: false,
-    initialOutputMode: 'preview',
+    initialOutputMode: 'preview'
   })
-  const userImportMap = computed<ImportMap>(() => {
-    const code = state.files[USER_IMPORT_MAP].code.trim()
-
-    if (!code) return {}
-    try {
-      return JSON.parse(code)
-    } catch (err) {
-      console.error(err)
-    }
-  })
-  const buildInImportMap = reactive({
-    imports: {
-      'naive-ui': 'https://cdn.jsdelivr.net/npm/naive-ui-esm@0.0.2/dist/index.mjs',
-      'vue': 'https://unpkg.com/@vue/runtime-dom@3.2.41/dist/runtime-dom.esm-browser.js'
-    }
-  })
-  const importMap = computed<ImportMap>(() => (
-    {
-      imports: {
-        ...buildInImportMap.imports,
-        ...userImportMap.value?.imports
-      }
-    }
-  ))
+  const importMap = reactive(BUILT_IN_IMPORT_MAP)
   watch(
     importMap,
     (content) => {
-      state.files[IMPORT_MAP] = new File(
-        IMPORT_MAP,
-        JSON.stringify(content, undefined, 2),
-      )
+      state.files[IMPORT_MAP].code = JSON.stringify(content, undefined, 2)
     },
     { immediate: true, deep: true }
   )
@@ -131,8 +111,7 @@ export const useStore = (initial: Initial) => {
     if (serializedState) {
       const saved = deserialize(serializedState)
       for (const [filename, file] of Object.entries(saved)) {
-        if (filename === '_o')
-          continue
+        if (filename === '_o') continue
         files[filename] = new File(filename, file as string)
       }
     } else {
@@ -140,8 +119,11 @@ export const useStore = (initial: Initial) => {
     }
     files[NAIVEUI_FILE] = new File(NAIVEUI_FILE, naiveUiCode, true)
     files[MAIN_FILE] = new File(MAIN_FILE, mainCode, true)
-    if (!files[USER_IMPORT_MAP]) {
-      files[USER_IMPORT_MAP] = new File(USER_IMPORT_MAP, JSON.stringify({ imports: {} }, undefined, 2))
+    if (!files[IMPORT_MAP]) {
+      files[IMPORT_MAP] = new File(
+        IMPORT_MAP,
+        JSON.stringify(BUILT_IN_IMPORT_MAP, undefined, 2)
+      )
     }
     return files
   }
@@ -153,8 +135,8 @@ export const useStore = (initial: Initial) => {
   }
 
   function addFile(fileOrFilename: string | File) {
-    const file
-      = typeof fileOrFilename === 'string'
+    const file =
+      typeof fileOrFilename === 'string'
         ? new File(fileOrFilename)
         : fileOrFilename
     state.files[file.filename] = file
@@ -165,7 +147,7 @@ export const useStore = (initial: Initial) => {
   }
 
   function getImportMap() {
-    return importMap.value
+    return importMap
   }
 
   function setImportMap() {
@@ -184,15 +166,19 @@ export const useStore = (initial: Initial) => {
   }
 
   async function setVueVersion(version: string) {
-    compiler.value = await import(`https://unpkg.com/@vue/compiler-sfc@${version}/dist/compiler-sfc.esm-browser.js`)
+    compiler.value = await import(
+      `https://unpkg.com/@vue/compiler-sfc@${version}/dist/compiler-sfc.esm-browser.js`
+    )
     // @ts-expect-error compiler is unknown
     store.compiler = compiler.value
     versions.vue = version
-    importMap.value.imports.vue = `https://unpkg.com/@vue/runtime-dom@${version}/dist/runtime-dom.esm-browser.js`
+    importMap.imports.vue = `https://unpkg.com/@vue/runtime-dom@${version}/dist/runtime-dom.esm-browser.js`
   }
   async function setNaiveVersion(version: string) {
     versions.naiveUI = version
-    importMap.value.imports['naive-ui'] = `https://cdn.jsdelivr.net/npm/naive-ui-esm@${version}/dist/index.mjs`
+    importMap.imports[
+      'naive-ui'
+    ] = `https://cdn.jsdelivr.net/npm/naive-ui-esm@${version}/dist/index.mjs`
   }
 
   return {
@@ -202,7 +188,7 @@ export const useStore = (initial: Initial) => {
 
     init,
     serialize,
-    setVersion,
+    setVersion
   }
 }
 
